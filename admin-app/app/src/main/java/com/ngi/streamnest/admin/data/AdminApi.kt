@@ -74,10 +74,13 @@ class AdminApi(private val store: SessionStore) {
         )
         // Login-এর পর admin role যাচাই: admins টেবিলে নিজের row থাকতে হবে
         store.save(session)
-        val rows = rest("GET", "admins?select=user_id")
-        if (rows.trim() == "[]") {
+        try {
+            val rows = rest("GET", "admins?select=user_id")
+            if (rows.trim() == "[]") throw ApiException("এই অ্যাকাউন্টের admin অনুমতি নেই")
+        } catch (e: Exception) {
+            // যাচাই ব্যর্থ (অনুমতি নেই বা নেটওয়ার্ক) হলে টোকেন রাখা যাবে না
             store.clear()
-            throw ApiException("এই অ্যাকাউন্টের admin অনুমতি নেই")
+            throw e
         }
         session
     }

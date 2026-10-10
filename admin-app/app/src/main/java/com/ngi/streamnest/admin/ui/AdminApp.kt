@@ -69,9 +69,13 @@ fun AdminApp(vm: AdminViewModel = viewModel()) {
                 modifier = Modifier.padding(padding),
             )
         }
-        return
+    } else {
+        AdminMain(vm = vm, snackbar = snackbar)
     }
+}
 
+@Composable
+private fun AdminMain(vm: AdminViewModel, snackbar: SnackbarHostState) {
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route

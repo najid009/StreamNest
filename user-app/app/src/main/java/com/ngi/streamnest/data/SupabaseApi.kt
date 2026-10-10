@@ -8,6 +8,10 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 /**
@@ -35,8 +39,16 @@ object SupabaseApi {
     suspend fun featured(): List<FeaturedItem> =
         get("featured_items?select=*&is_active=eq.true&order=sort_order.asc", ListSerializer(FeaturedItem.serializer()))
 
-    suspend fun matches(): List<MatchItem> =
-        get("matches?select=*&order=start_time.asc&limit=50", ListSerializer(MatchItem.serializer()))
+    /** গত ১ দিন থেকে সামনের সব ইভেন্ট (পুরোনো ইভেন্ট তালিকা ভরিয়ে দেবে না) */
+    suspend fun matches(): List<MatchItem> {
+        val fromUtc = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date(System.currentTimeMillis() - 24L * 60 * 60 * 1000))
+        return get(
+            "matches?select=*&or=(start_time.gte.$fromUtc,start_time.is.null)&order=start_time.asc&limit=100",
+            ListSerializer(MatchItem.serializer()),
+        )
+    }
 
     private suspend fun <T> get(path: String, strategy: DeserializationStrategy<List<T>>): List<T> =
         withContext(Dispatchers.IO) {
