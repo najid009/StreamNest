@@ -1,0 +1,56 @@
+name: Admin App Build
+
+on:
+  push:
+    paths:
+      - 'admin-app/**'
+      - '.github/workflows/admin-app.yml'
+  pull_request:
+    paths:
+      - 'admin-app/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Surface build errors as annotations
+        if: failure()
+        run: |
+          # Gradle-এর শেষ অংশ (error বিবরণ) একটি annotation হিসেবে পাঠায়
+          # Kotlin/Gradle compile error লাইনগুলো (e: / What went wrong) আগে দেখাবে
+          msg=$( (grep -E "^e: |What went wrong" -A3 build.log; echo "----"; grep -v "^> Task" build.log | grep -v "^\s*at " | tail -n 40) | head -c 7000 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error::${msg}"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: streamnest-admin-debug
+          path: admin-app/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

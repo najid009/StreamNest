@@ -1,0 +1,5 @@
+# Supabase CLI config (functions deploy-এর জন্য)
+project_id = "streamnest"
+
+[functions.sync-sports]
+verify_jwt = true

@@ -1,5 +1,10 @@
 package com.ngi.streamnest.ui.common
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +69,23 @@ fun WarningText(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.secondary,
         modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    )
+}
+
+/** লোডিংয়ের সময় ঝিলমিল placeholder (skeleton) */
+@Composable
+fun SkeletonBox(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "skeleton")
+    val alpha by transition.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(animation = tween(900), repeatMode = RepeatMode.Reverse),
+        label = "skeleton-alpha",
+    )
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = alpha)),
     )
 }
 
@@ -148,6 +171,8 @@ fun MatchCard(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Spacer(Modifier.height(8.dp))
@@ -156,6 +181,7 @@ fun MatchCard(
                     text = match.score ?: formatTime(match.startTime),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = if (match.score != null) FontWeight.Bold else FontWeight.Normal,
                 )
                 Spacer(Modifier.weight(1f))
                 Text(

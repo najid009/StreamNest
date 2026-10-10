@@ -2,4 +2,5 @@
 <resources>
     <color name="ic_launcher_background">#0B1B2B</color>
     <color name="nest_green">#39E58C</color>
+    <color name="transparent">#00000000</color>
 </resources>
