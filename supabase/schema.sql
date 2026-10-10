@@ -54,6 +54,44 @@ alter table public.api_settings add column if not exists last_error text;
 insert into public.api_settings (provider) values ('cricket'), ('football')
 on conflict (provider) do nothing;
 
+-- ===== Existing tables: কলাম মেরামত =====
+-- "create table if not exists" আগে থেকে থাকা টেবিলে নতুন কলাম যোগ করে না।
+-- আগের কোনো চেষ্টায় টেবিল অসম্পূর্ণ হয়ে থাকলে এই ব্লক সেটি সম্পূর্ণ করে। বারবার চালানো নিরাপদ।
+
+alter table public.channels add column if not exists name        text not null default '';
+alter table public.channels add column if not exists logo_url   text;
+alter table public.channels add column if not exists stream_url text not null default '';
+alter table public.channels add column if not exists category   text not null default 'general';
+alter table public.channels add column if not exists is_active  boolean not null default true;
+alter table public.channels add column if not exists sort_order int not null default 0;
+alter table public.channels add column if not exists created_at timestamptz not null default now();
+
+alter table public.featured_items add column if not exists title        text not null default '';
+alter table public.featured_items add column if not exists image_url    text not null default '';
+alter table public.featured_items add column if not exists action_type  text not null default 'url';
+alter table public.featured_items add column if not exists action_value text not null default '';
+alter table public.featured_items add column if not exists is_active    boolean not null default true;
+alter table public.featured_items add column if not exists sort_order   int not null default 0;
+alter table public.featured_items add column if not exists created_at   timestamptz not null default now();
+
+alter table public.matches add column if not exists sport       text not null default 'football';
+alter table public.matches add column if not exists external_id text;
+alter table public.matches add column if not exists title       text not null default '';
+alter table public.matches add column if not exists league      text;
+alter table public.matches add column if not exists team_a      text;
+alter table public.matches add column if not exists team_b      text;
+alter table public.matches add column if not exists start_time  timestamptz;
+alter table public.matches add column if not exists status      text not null default 'upcoming';
+alter table public.matches add column if not exists score       text;
+alter table public.matches add column if not exists channel_id  uuid references public.channels(id) on delete set null;
+alter table public.matches add column if not exists updated_at  timestamptz not null default now();
+-- sync-sports upsert (onConflict external_id) এর জন্য unique index লাগে
+create unique index if not exists matches_external_id_key on public.matches (external_id);
+
+alter table public.api_settings add column if not exists enabled        boolean not null default false;
+alter table public.api_settings add column if not exists last_synced_at timestamptz;
+alter table public.api_settings add column if not exists daily_usage    int not null default 0;
+
 -- ===== Admin role =====
 
 create table if not exists public.admins (
