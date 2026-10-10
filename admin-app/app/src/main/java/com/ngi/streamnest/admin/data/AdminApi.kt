@@ -17,6 +17,19 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
 
+// buildJsonObject-এর জন্য ছোট helper (কোটলিনের Primitive মান JsonElement-এ মোড়ানো)
+private fun JsonObjectBuilder.put(key: String, value: String) {
+    put(key, JsonPrimitive(value))
+}
+
+private fun JsonObjectBuilder.put(key: String, value: Boolean) {
+    put(key, JsonPrimitive(value))
+}
+
+private fun JsonObjectBuilder.put(key: String, value: Int) {
+    put(key, JsonPrimitive(value))
+}
+
 class ApiException(message: String) : Exception(message)
 
 /**
