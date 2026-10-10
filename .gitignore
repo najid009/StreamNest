@@ -1,0 +1,17 @@
+# Gradle / Android build output
+.gradle/
+**/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Local config (secrets stay out of Git)
+local.properties
+**/local.properties
+.env
+
+# IDE
+.idea/
+*.iml
+.DS_Store
