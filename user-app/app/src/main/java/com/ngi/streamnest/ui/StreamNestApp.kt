@@ -25,7 +25,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.findStartDestination
 import androidx.navigation.navArgument
 import com.ngi.streamnest.MainViewModel
 import com.ngi.streamnest.data.Channel
@@ -118,7 +117,7 @@ fun StreamNestApp(vm: MainViewModel = viewModel()) {
                             selected = currentRoute == tab.route,
                             onClick = {
                                 nav.navigate(tab.route) {
-                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                                    popUpTo(nav.graph.startDestinationId) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
