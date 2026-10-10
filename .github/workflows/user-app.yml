@@ -44,7 +44,8 @@ jobs:
         if: failure()
         run: |
           # Gradle-এর শেষ অংশ (error বিবরণ) একটি annotation হিসেবে পাঠায়
-          msg=$(grep -v "^> Task" build.log | tail -n 150 | tail -c 7000 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
+          # Kotlin/Gradle compile error লাইনগুলো (e: / What went wrong) আগে দেখাবে
+          msg=$( (grep -E "^e: |What went wrong" -A3 build.log; echo "----"; grep -v "^> Task" build.log | grep -v "^\s*at " | tail -n 40) | head -c 7000 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
           echo "::error::${msg}"
 
       - name: Upload APK
