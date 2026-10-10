@@ -35,7 +35,14 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+        run: gradle :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Surface build errors as annotations
+        if: failure()
+        run: |
+          grep -nE "^e: |What went wrong|Could not |Execution failed|error:|> " build.log | head -60 | while IFS= read -r line; do
+            echo "::error::${line}"
+          done
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
